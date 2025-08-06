@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromptHive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1f2937;
+      width: 420px;
+      min-height: 600px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px 16px 0 0;
+      min-height: 600px;
+      position: relative;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 1rem 1rem;
+      border-radius: 16px 16px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(45deg, #fbbf24, #f59e0b);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .dashboard-icon {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      position: relative;
+    }
+
+    .dashboard-icon:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .dashboard-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    /* Tooltip for dashboard icon */
+    .dashboard-icon::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      margin-bottom: 5px;
+      z-index: 1000;
+    }
+
+    .dashboard-icon::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+
+    .dashboard-icon:hover::before,
+    .dashboard-icon:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .main-content {
+      padding: 1.5rem 1rem;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    }
+
+    .prompt-list {
+      max-height: 320px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .prompt-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .prompt-list::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    .prompt-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+
+    .prompt-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid #f1f5f9;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .prompt-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      border-color: #e2e8f0;
+    }
+
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .prompt-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #1f2937;
+      line-height: 1.3;
+      flex: 1;
+      margin-right: 0.5rem;
+    }
+
+    .prompt-id {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .prompt-meta {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .meta-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .meta-right {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      position: relative;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #374151;
+      transform: scale(1.1);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Enhanced tooltip for icon buttons */
+    .icon-btn::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      margin-bottom: 4px;
+      z-index: 1000;
+    }
+
+    .icon-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+
+    .icon-btn:hover::before,
+    .icon-btn:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .prompt-content {
+      font-size: 0.85rem;
+      color: #4b5563;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+      max-height: 3.6em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #475569;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 36px;
+    }
+
+    .action-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: transparent;
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .action-btn.enhance-btn {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      border-color: transparent;
+      color: white;
+    }
+
+    .action-btn.enhance-btn:hover {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+
+    .empty-state p {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80%;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.2s ease-out;
+    }
+
+    .enhancement-modal {
+      max-width: 600px;
+      width: 95%;
+    }
+
+    .dashboard-modal {
+      max-width: 800px;
+      width: 95%;
+      max-height: 90%;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .modal-actions {
+      padding: 1rem 1.5rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    /* Enhanced Dashboard Modal Specific Styles */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .dashboard-card-label {
+      font-size: 0.8rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .dashboard-section {
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Enhancement Modal Specific Styles */
+    .enhancement-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .prompt-version {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.75rem;
+      background: #f9fafb;
+    }
+
+    .prompt-version.original {
+      border-color: #d1d5db;
+    }
+
+    .prompt-version.enhanced {
+      border-color: #8b5cf6;
+      background: #faf5ff;
+    }
+
+    .version-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .version-content {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #4b5563;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .loading-enhancement {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .loading-enhancement .spinner {
+      margin-bottom: 0.75rem;
+    }
+
+    .enhancement-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .enhancement-actions .action-btn {
+      min-width: auto;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    /* History Modal Styles */
+    .history-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .history-entry {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .history-header {
+      background: #f9fafb;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-version {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .history-content {
+      padding: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #4b5563;
+    }
+
+    .history-actions {
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+    }
+
+    .restore-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+    }
+
+    .restore-btn:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .notification {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      z-index: 2000;
+      display: none;
+      animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 50%;
+      border-top-color: #667eea;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .enhancement-comparison {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      
+      .modal {
+        width: 95%;
+        margin: 1rem;
+      }
+      
+      .version-content {
+        max-height: 100px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      .action-btn {
+        min-width: 100%;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo">🏠</div>
+          <div>
+            <h1>PromptHive</h1>
+            <div class="stats">
+              <div class="stat">
+                <span>📝</span>
+                <span id="totalPrompts">0</span>
+              </div>
+              <div class="stat">
+                <span>🏷️</span>
+                <span id="totalTags">0</span>
+              </div>
+              <div class="stat">
+                <span>📊</span>
+                <span id="totalUses">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-icon" id="dashboardBtn" data-tooltip="Open Analytics Dashboard">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          class="search-bar" 
+          id="searchInput" 
+          placeholder="Search prompts by title, content, or tags..." 
+          aria-label="Search prompts"
+        />
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="addPromptBtn" aria-label="Add new prompt">
+          <span>➕</span>
+          Add Prompt
+        </button>
+        <button class="btn btn-secondary" id="exportBtn" aria-label="Export prompts">
+          <span>📤</span>
+          Export
+        </button>
+      </div>
+
+      <div id="promptList" class="prompt-list"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Prompt Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add New Prompt</h2>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="promptTitle">Title</label>
+          <input 
+            class="form-input" 
+            id="promptTitle" 
+            placeholder="Enter prompt title..." 
+            maxlength="100"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="promptText">Prompt Content</label>
+          <textarea 
+            class="form-input form-textarea" 
+            id="promptText" 
+            placeholder="Enter your prompt here..."
+            required
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="promptTags">Tags</label>
+          <input 
+            class="form-input" 
+            id="promptTags" 
+            placeholder="comma, separated, tags..." 
+          />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="savePromptBtn">Save Prompt</button>
+        <button class="action-btn" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Enhancement Modal -->
+  <div class="modal-overlay" id="enhancementModalOverlay">
+    <div class="modal enhancement-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>🤖</span>
+          AI Enhancement Comparison
+        </h2>
+      </div>
+      <div class="modal-body">
+        <div class="enhancement-comparison">
+          <div class="prompt-version original">
+            <div class="version-label">
+              <span>📝</span>
+              Original Version
+            </div>
+            <div class="version-content" id="originalPrompt"></div>
+          </div>
+          <div class="prompt-version enhanced">
+            <div class="version-label">
+              <span>🤖</span>
+              AI Enhanced Version
+            </div>
+            <div class="version-content" id="enhancedPrompt"></div>
+          </div>
+        </div>
+        <div class="enhancement-actions">
+          <button class="action-btn" id="keepOriginalBtn">
+            <span>📝</span>
+            Keep Original
+          </button>
+          <button class="action-btn enhance-btn" id="keepEnhancedBtn">
+            <span>🤖</span>
+            Keep Enhanced
+          </button>
+          <button class="action-btn" id="cancelEnhancementBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal-overlay" id="historyModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>🕒</span>
+          History: <span id="historyPromptTitle"></span>
+        </h2>
+      </div>
+      <div class="modal-body">
+        <div class="history-list" id="historyList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="action-btn" id="closeHistoryBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Dashboard Modal -->
+  <div class="modal-overlay" id="dashboardModalOverlay">
+    <div class="modal dashboard-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>📊</span>
+          Analytics Dashboard
+        </h2>
+      </div>
+      <div class="modal-body">
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">📝</div>
+            <div class="dashboard-card-value" id="dashTotalPrompts">0</div>
+            <div class="dashboard-card-label">Total Prompts</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">📊</div>
+            <div class="dashboard-card-value" id="dashTotalUses">0</div>
+            <div class="dashboard-card-label">Total Usage</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">👤</div>
+            <div class="dashboard-card-value" id="dashDailyActive">1</div>
+            <div class="dashboard-card-label">Daily Active Users</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">⬇️</div>
+            <div class="dashboard-card-value" id="dashTotalInstalls">1</div>
+            <div class="dashboard-card-label">Total Installs</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">🔥</div>
+            <div class="dashboard-card-value" id="dashRecentActivity">0</div>
+            <div class="dashboard-card-label">Recent Activity</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">🔄</div>
+            <div class="dashboard-card-value" id="dashReuseRate">0%</div>
+            <div class="dashboard-card-label">Prompt Reuse Rate</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">🏷️</div>
+            <div class="dashboard-card-value" id="dashTotalTags">0</div>
+            <div class="dashboard-card-label">Most Tags Used</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="dashboard-card-icon">⭐</div>
+            <div class="dashboard-card-value" id="dashAvgUses">0</div>
+            <div class="dashboard-card-label">Avg Uses</div>
+          </div>
+        </div>
+
+        <div class="dashboard-section">
+          <h3>
+            <span>🔥</span>
+            Most Used Prompts
+          </h3>
+          <div id="topPrompts" class="history-list"></div>
+        </div>
+
+        <div class="dashboard-section">
+          <h3>
+            <span>📈</span>
+            Category Breakdown
+          </h3>
+          <div id="categoryBreakdown"></div>
+        </div>
+
+        <div class="dashboard-section">
+          <h3>
+            <span>🏷️</span>
+            Popular Tags
+          </h3>
+          <div id="popularTags" class="tags"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="action-btn" id="closeDashboardBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
