@@ -2,6 +2,7 @@
 // Fixes: Duplicate prompt creation, floating button save, version history
 class PromptHive {
   constructor() {
+    console.log('PromptHive constructor called - creating new instance');
     this.prompts = [];
     this.editingPromptId = null;
     this.filteredPrompts = [];
@@ -9,6 +10,8 @@ class PromptHive {
     this.currentPromptHistory = [];
     this.currentEnhancingPromptId = null;
     this.isInitialized = false;
+    this.messageListenerSetup = false;
+    this.eventsBindingSetup = false;
     this.saveInProgress = new Set(); // Track saves in progress
     this.stats = {
       totalPrompts: 0,
@@ -61,6 +64,10 @@ class PromptHive {
   }
 
   setupMessageListener() {
+    // Prevent duplicate listeners
+    if (this.messageListenerSetup) return;
+    this.messageListenerSetup = true;
+    
     // Listen for messages from content script and background
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log('Popup received message:', request.action);
@@ -552,6 +559,10 @@ class PromptHive {
   }
 
   bindEvents() {
+    // Prevent duplicate event binding
+    if (this.eventsBindingSetup) return;
+    this.eventsBindingSetup = true;
+    
     try {
       // Search functionality
       const searchInput = document.getElementById("searchInput");
@@ -1499,19 +1510,22 @@ class PromptHive {
 // Global reference for event handlers
 let promptHive;
 
-// Initialize the app when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  console.log('DOM loaded, initializing PromptHive...');
+// Initialize the app - ensure single initialization
+function initializePromptHive() {
+  if (promptHive) {
+    console.log('PromptHive already initialized, skipping duplicate initialization...');
+    return;
+  }
+  console.log('Creating new PromptHive instance...');
   promptHive = new PromptHive();
-});
+}
 
-// Also initialize if DOM is already loaded
+// Initialize based on document ready state
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing PromptHive...');
-    promptHive = new PromptHive();
-  });
+  // Document is still loading, wait for DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', initializePromptHive, { once: true });
 } else {
+  // Document is already loaded, initialize immediately
   console.log('DOM already loaded, initializing PromptHive immediately...');
-  promptHive = new PromptHive();
+  initializePromptHive();
 }
